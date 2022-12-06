@@ -36,7 +36,7 @@ type FlightOutput struct {
 	Flight flightsorter.Flight `json:"flight"`
 }
 
-// CalculateEndpoint represents /caluclate exposed by http. It takes request, does some checking, then calls flight sorter
+// CalculateEndpoint represents /calculate exposed by http. It takes request, does some checking, then calls flight sorter
 // function and return appropriate results
 func CalculateEndpoint(req *http.Request) (helpers.JsonValue, helpers.HttpCode, error) {
 	if req.Method != http.MethodPost {
