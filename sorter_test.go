@@ -19,25 +19,25 @@ func TestConnectedFlightIsReturnedForMultipleFlights(t *testing.T) {
 	}{
 		{
 			input: []Flight{
-				{Start: "SFO", Dest: "EWR"},
+				{Source: "SFO", Dest: "EWR"},
 			},
-			expected: Flight{Start: "SFO", Dest: "EWR"},
+			expected: Flight{Source: "SFO", Dest: "EWR"},
 		},
 		{
 			input: []Flight{
-				{Start: "ATL", Dest: "EWR"},
-				{Start: "SFO", Dest: "ATL"},
+				{Source: "ATL", Dest: "EWR"},
+				{Source: "SFO", Dest: "ATL"},
 			},
-			expected: Flight{Start: "SFO", Dest: "EWR"},
+			expected: Flight{Source: "SFO", Dest: "EWR"},
 		},
 		{
 			input: []Flight{
-				{Start: "IND", Dest: "EWR"},
-				{Start: "SFO", Dest: "ATL"},
-				{Start: "GSO", Dest: "IND"},
-				{Start: "ATL", Dest: "GSO"},
+				{Source: "IND", Dest: "EWR"},
+				{Source: "SFO", Dest: "ATL"},
+				{Source: "GSO", Dest: "IND"},
+				{Source: "ATL", Dest: "GSO"},
 			},
-			expected: Flight{Start: "SFO", Dest: "EWR"},
+			expected: Flight{Source: "SFO", Dest: "EWR"},
 		},
 	}
 
@@ -51,40 +51,40 @@ func TestConnectedFlightIsReturnedForMultipleFlights(t *testing.T) {
 
 func TestFlightLoopIsDetected(t *testing.T) {
 	_, err := SortFlights([]Flight{
-		{Start: "A", Dest: "B"},
-		{Start: "B", Dest: "A"},
+		{Source: "A", Dest: "B"},
+		{Source: "B", Dest: "A"},
 	})
 	assert.Equal(t, ErrFlightLoop, err)
 }
 
 func TestBrokenFlightPathIsDetected(t *testing.T) {
 	_, err := SortFlights([]Flight{
-		{Start: "A", Dest: "B"},
+		{Source: "A", Dest: "B"},
 		// missing: "B" -> "C"
-		{Start: "C", Dest: "D"},
+		{Source: "C", Dest: "D"},
 	})
 	assert.Equal(t, ErrBrokenPath, err)
 }
 
 func TestSplitPathIsDetected(t *testing.T) {
 	_, err := SortFlights([]Flight{
-		{Start: "A", Dest: "B"},
-		{Start: "A", Dest: "C"},
+		{Source: "A", Dest: "B"},
+		{Source: "A", Dest: "C"},
 	})
 	assert.Equal(t, ErrBrokenPath, err)
 }
 
 func TestMergedPathIsDetected(t *testing.T) {
 	_, err := SortFlights([]Flight{
-		{Start: "A", Dest: "B"},
-		{Start: "C", Dest: "B"},
+		{Source: "A", Dest: "B"},
+		{Source: "C", Dest: "B"},
 	})
 	assert.Equal(t, ErrBrokenPath, err)
 }
 
 const testJson = `
 {
-	"start" : "A",
+	"source" : "A",
 	"dest" : "B"
 }
 `
@@ -93,7 +93,7 @@ func TestFlightIsUnmarshaledFromJson(t *testing.T) {
 	var flight Flight
 	assert.NoError(t, json.Unmarshal([]byte(testJson), &flight))
 	assert.Equal(t, Flight{
-		Start: "A",
-		Dest:  "B",
+		Source: "A",
+		Dest:   "B",
 	}, flight)
 }
