@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -36,29 +35,13 @@ type FlightOutput struct {
 	Flight flightsorter.Flight `json:"flight"`
 }
 
-// CalculateEndpoint represents /calculate exposed by http. It takes request, does some checking, then calls flight sorter
-// function and return appropriate results
-func CalculateEndpoint(req *http.Request) (helpers.JsonValue, helpers.HttpCode, error) {
-	if req.Method != http.MethodPost {
-		return nil, http.StatusMethodNotAllowed, errors.New("only POST method allowed")
-	}
-
-	if req.Header.Get("Content-Type") != "application/json" {
-		return nil, http.StatusUnsupportedMediaType, errors.New("only json payloads supported")
-	}
-
-	var input FlightsInput
-	if err := json.NewDecoder(req.Body).Decode(&input); err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("json parsing: %w", err)
-	}
-	if err := input.Validate(); err != nil {
-		return nil, http.StatusUnprocessableEntity, fmt.Errorf("input sanitization: %w", err)
-	}
-
+// CalculateEndpoint represents /calculate exposed by http. It takes already parsed input struct, calls flight sorting function
+// and returns FlightOutput with single flight or appropriate error
+func CalculateEndpoint(input FlightsInput) (FlightOutput, helpers.HttpCode, error) {
 	flight, err := flightsorter.SortFlights(input.Flights)
 	if err != nil {
-		return nil, http.StatusUnprocessableEntity, fmt.Errorf("invalid flight data: %w", err)
+		return FlightOutput{}, http.StatusUnprocessableEntity, fmt.Errorf("invalid flight data: %w", err)
 	}
 
-	return &FlightOutput{Flight: flight}, http.StatusOK, nil
+	return FlightOutput{Flight: flight}, http.StatusOK, nil
 }

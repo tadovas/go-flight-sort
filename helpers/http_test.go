@@ -4,20 +4,29 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+type inputTest struct {
+}
+
+func (inputTest) Validate() error {
+	return nil
+}
+
+type outputTest struct {
+}
+
 func TestJsonHandlerWritesCorrectJsonOutput(t *testing.T) {
-	req := httptest.NewRequest(http.MethodPost, "/<irrelevant>", nil)
+	req := httptest.NewRequest(http.MethodPost, "/<irrelevant>", strings.NewReader("{}"))
 	resp := httptest.NewRecorder()
 
-	httpHandler := JsonHandler(func(req *http.Request) (JsonValue, HttpCode, error) {
-		return struct {
-				SomeField string `json:"some_field"`
-			}{
-				SomeField: "abc",
+	httpHandler := JsonHandler(http.MethodPost, "", func(ts inputTest) (map[string]interface{}, HttpCode, error) {
+		return map[string]interface{}{
+				"some_field": "abc",
 			},
 			http.StatusOK,
 			nil
@@ -31,11 +40,11 @@ func TestJsonHandlerWritesCorrectJsonOutput(t *testing.T) {
 }
 
 func TestJsonHandlerWritesCorrectError(t *testing.T) {
-	req := httptest.NewRequest(http.MethodPost, "/<irrelevant>", nil)
+	req := httptest.NewRequest(http.MethodPost, "/<irrelevant>", strings.NewReader("{}"))
 	resp := httptest.NewRecorder()
 
-	httpHandler := JsonHandler(func(req *http.Request) (JsonValue, HttpCode, error) {
-		return nil, http.StatusBadRequest, errors.New("big error")
+	httpHandler := JsonHandler(http.MethodPost, "", func(inputTest) (outputTest, HttpCode, error) {
+		return outputTest{}, http.StatusBadRequest, errors.New("big error")
 	})
 
 	httpHandler(resp, req)

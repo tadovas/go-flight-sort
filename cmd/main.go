@@ -11,7 +11,7 @@ import (
 )
 
 func run() error {
-	http.HandleFunc("/calculate", helpers.JsonHandler(endpoints.CalculateEndpoint))
+	http.HandleFunc("/calculate", helpers.JsonHandler(http.MethodPost, "application/json", endpoints.CalculateEndpoint))
 
 	l, err := net.Listen("tcp", ":8080")
 	if err != nil {
